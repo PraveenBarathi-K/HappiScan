@@ -1,73 +1,219 @@
-### HappieScan
+# 🎉 HappieScan
 
+## 📌 Overview
+The **HappieScan** is a web application that allows users to participate in a fun competition where they can make wishes, generate QR codes, and scan QR codes to interact with others. The project consists of a **React frontend** and a **Node.js backend** running on a Linux server.
 
-# Getting Started with Create React App
+---
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 🚀 Features
+- 🌟 **Make a Wish** - Users can enter their details and generate a unique QR code.
+- 📸 **QR Code Scanner** - Scan QR codes to send wishes.
+- 🏆 **Leaderboard** - Track the top users with the highest interactions.
+- 📱 **Responsive Design** - Optimized for both mobile and desktop.
+- 🎨 **Modern UI** - A black & white contrast theme with a neat and elegant design.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🏗️ Tech Stack
+### **Frontend (React)**
+- React.js (with Hooks)
+- Tailwind CSS / Custom CSS for styling
+- QR Code Generator
+- React QR Scanner
 
-### `npm start`
+### **Backend (Node.js + Express)**
+- Express.js for API handling
+- MongoDB for storing user data & leaderboard
+- QR Code generation & validation
+- Axios for API requests
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### **Deployment**
+- Linux Server (Ubuntu)
+- Nginx (Reverse Proxy)
+- PM2 (Process Manager for Node.js)
+- Serve (for React production build)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🎯 Installation & Setup
+### **1️⃣ Clone the Repository**
+```sh
+git clone https://github.com/your-repo.git
+cd your-repo
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### **2️⃣ Install Dependencies**
+#### **Backend:**
+```sh
+cd backend
+npm install
+```
 
-### `npm run build`
+#### **Frontend:**
+```sh
+cd frontend
+npm install
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### **3️⃣ Run the App**
+#### **Backend:**
+```sh
+npm start
+```
+OR using PM2:
+```sh
+pm install -g pm2
+pm start server.js --name backend
+pm save
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### **Frontend:**
+```sh
+npm start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🌍 Deployment on Linux Server
+### **1️⃣ Setup Node.js & Nginx**
+```sh
+sudo apt update && sudo apt install nodejs npm nginx -y
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### **2️⃣ Deploy Backend**
+```sh
+cd backend
+npm install
+pm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### **3️⃣ Deploy Frontend**
+```sh
+cd frontend
+npm install
+npm run build
+serve -s build -l 3000
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### **4️⃣ Setup Nginx**
+```sh
+sudo nano /etc/nginx/sites-available/default
+```
+Replace content with:
+```nginx
+server {
+    listen 80;
+    server_name your-server-ip;
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    location / {
+        root /path-to-frontend/build;
+        index index.html;
+        try_files $uri /index.html;
+    }
 
-## Learn More
+    location /api/ {
+        proxy_pass http://localhost:5000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+Save and restart:
+```sh
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### **5️⃣ Firewall Setup**
+```sh
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 📜 API Endpoints
+### **1️⃣ Generate QR Code**
+```http
+POST /api/wishes/generate_qr
+```
+#### **Request Body:**
+```json
+{
+    "user_id": "123456",
+    "name": "John Doe"
+}
+```
+#### **Response:**
+```json
+{
+    "qr_code": "base64_encoded_string"
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### **2️⃣ Scan QR Code**
+```http
+POST /api/wishes/scan_qr
+```
+#### **Request Body:**
+```json
+{
+    "from_user": "123456",
+    "to_user": "654321"
+}
+```
+#### **Response:**
+```json
+{
+    "message": "Wish recorded successfully"
+}
+```
 
-### Analyzing the Bundle Size
+### **3️⃣ Leaderboard**
+```http
+GET /api/leader/leaderboard
+```
+#### **Response:**
+```json
+[
+    {
+        "user_id": "123456",
+        "name": "John Doe",
+        "total_points": 10
+    }
+]
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 🛠️ To-Do List
+- ✅ Implement QR Code generation
+- ✅ Add a leaderboard
+- 🔜 Implement user authentication
+- 🔜 Improve UI animations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 🤝 Contributing
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature-name`)
+3. Commit your changes (`git commit -m 'Add feature'`)
+4. Push to the branch (`git push origin feature-name`)
+5. Create a Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 📄 License
+This project is licensed under the **MIT License**.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 📩 Contact
+For any queries, reach out via email: **praveenbarathi95@gmail.com**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Happy Coding! 🎉**
+
